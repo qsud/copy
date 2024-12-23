@@ -1,7 +1,7 @@
 import time
 import asyncio
-import uuid
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 
 API_ID = "10647635"
 API_HASH = "1c14e1c8cc585cb65dc9180a36089bd6"
@@ -9,10 +9,9 @@ PHONE_NUMBER = "+919955711670"
 
 GROUP_ID = -1002415943593
 
-# Generate a unique session name for each run
-session_name = f"session_{uuid.uuid4().hex}"
-
-client = TelegramClient(session_name, API_ID, API_HASH)
+# Use StringSession instead of file-based sessions
+session = StringSession()  # Empty for new session
+client = TelegramClient(session, API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=GROUP_ID))
 async def forward_bot_messages(event):
@@ -25,8 +24,9 @@ async def forward_bot_messages(event):
 
 async def main():
     print("Connecting to Telegram...")
-    await client.start(phone=PHONE_NUMBER)  # This will prompt for an OTP
+    await client.start(phone=PHONE_NUMBER)  # Prompts for OTP
     print(f"Connected! Listening for bot messages in group {GROUP_ID}...")
+    print(f"Save this session string for reuse: {client.session.save()}")
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
